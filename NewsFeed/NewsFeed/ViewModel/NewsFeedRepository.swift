@@ -6,5 +6,5 @@
 //
 
 protocol NewsFeedRepositoryProtocol {
-    func getData() async -> NewsFeedSourceModel?
+    func getData(page: Int) async -> NewsFeedSourceModel?
 }

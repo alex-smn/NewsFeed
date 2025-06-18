@@ -6,12 +6,12 @@
 //
 
 struct NewsFeedSourceModel: Codable {
-    let news: [NewsItemSourceModel]
-    let totalCount: Int
+    var news: [NewsItemSourceModel]
+    var totalCount: Int
 }
 
 struct NewsFeedModel {
-    let news: [NewsItemModel]
-    let totalCount: Int
+    var news: [NewsItemModel]
+    var totalCount: Int
 }
 

@@ -12,6 +12,7 @@ class NewsFeedView: UIView {
     
     init() {
         super.init(frame: .zero)
+        self.backgroundColor = .white
         
         addSubview(collectionView)
         collectionView.backgroundColor = .white
@@ -19,8 +20,8 @@ class NewsFeedView: UIView {
         
         collectionView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         collectionView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        collectionView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        collectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        collectionView.topAnchor.constraint(equalTo: self.layoutMarginsGuide.topAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: self.layoutMarginsGuide.bottomAnchor).isActive = true
     }
     
     required init?(coder: NSCoder) {

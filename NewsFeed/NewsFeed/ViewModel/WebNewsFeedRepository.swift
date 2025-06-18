@@ -8,9 +8,11 @@
 import Foundation
 
 class WebNewsFeedRepository: NewsFeedRepositoryProtocol {
-    let apiURL = Constants.apiBaseURL + "news/1/15"
+    private let newsPerPage = 15
     
-    func getData() async -> NewsFeedSourceModel? {
+    func getData(page: Int) async -> NewsFeedSourceModel? {
+        let apiURL = Constants.apiBaseURL + "news/\(page)/\(newsPerPage)"
+
         do {
             let (data, _) = try await URLSession.shared.data(from: URL(string: apiURL)!)
             let newsFeedDataModel = try JSONDecoder().decode(NewsFeedSourceModel.self, from: data)

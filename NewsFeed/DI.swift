@@ -15,12 +15,18 @@ class DI {
     static var mockNewsFeedViewController: UIViewController {
         let mockNewsFeedRepository = MockNewsFeedRepository()
         let newsFeedViewModel = NewsFeedViewModel(repository: mockNewsFeedRepository, imageManager: imageManager)
-        return NewsFeedViewController(viewModel: newsFeedViewModel)
+        let viewController =  NewsFeedViewController(viewModel: newsFeedViewModel)
+        newsFeedViewModel.viewController = viewController
+        
+        return viewController
     }
     
     static var newsFeedViewController: UIViewController {
         let webNewsFeedRepository = WebNewsFeedRepository()
         let newsFeedViewModel = NewsFeedViewModel(repository: webNewsFeedRepository, imageManager: imageManager)
-        return NewsFeedViewController(viewModel: newsFeedViewModel)
+        let viewController = NewsFeedViewController(viewModel: newsFeedViewModel)
+        newsFeedViewModel.viewController = viewController
+        
+        return viewController
     }
 }
