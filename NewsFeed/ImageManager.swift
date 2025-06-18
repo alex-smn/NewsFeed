@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol ImageManagerProtocol {
-    func getImage(from url: URL) -> AnyPublisher<UIImage?, Never>
+    func getImagePublisher(from url: URL) -> AnyPublisher<UIImage?, Never>
     func loadImage(from url: URL) async
 }
 
@@ -22,17 +22,20 @@ class ImageManager: ImageManagerProtocol {
         self.dataStorage = dataStorage
     }
     
-    func getImage(from url: URL) -> AnyPublisher<UIImage?, Never> {
-        let initialImagePublisher = Future<UIImage?, Never> { [weak self] promise in
-            Task {
-                if let data = await self?.loadFromCache(key: url.absoluteString) {
-                    let image = UIImage(data: data)
-                    promise(.success(image))
-                } else {
-                    promise(.success(nil))
+    func getImagePublisher(from url: URL) -> AnyPublisher<UIImage?, Never> {
+        let initialImagePublisher = CurrentValueSubject<Void, Never>(()).map { [weak self] _ in
+            Future<UIImage?, Never> { [weak self] promise in
+                Task {
+                    if let data = await self?.loadFromCache(key: url.absoluteString) {
+                        let image = UIImage(data: data)
+                        promise(.success(image))
+                    } else {
+                        promise(.success(nil))
+                    }
                 }
             }
         }
+            .switchToLatest()
         
         let networkImagePublisher = networkImageSubject.filter { $0.key == url.absoluteString }.map { $0.image }
         
@@ -55,8 +58,9 @@ class ImageManager: ImageManagerProtocol {
     private func loadImageFromNetwork(from url: URL) async {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            await saveToCache(key: url.absoluteString, imageData: data)
-            let image = UIImage(data: data)
+            let image = UIImage(data: data)?.scaledTo(height: Constants.newsItemImageHeight)
+            await saveToCache(key: url.absoluteString, imageData: image?.pngData() ?? data)
+            
             networkImageSubject.send((key: url.absoluteString, image: image))
         } catch {
             print("Failed to load image:", error.localizedDescription) // TODO: handle error

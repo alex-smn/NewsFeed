@@ -28,7 +28,7 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
                 return model?.news.map { item in
                     return item.toModel(
                         imagePublisher: self.imageManager
-                            .getImage(from: item.titleImageUrl)
+                            .getImagePublisher(from: item.titleImageUrl)
                             .receive(on: DispatchQueue.main)
                             .eraseToAnyPublisher()
                     )
@@ -57,11 +57,16 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
     init(repository: NewsFeedRepositoryProtocol, imageManager: ImageManagerProtocol) {
         self.repository = repository
         self.imageManager = imageManager
-        model = self.repository.getData()
-        model?.news.forEach { item in
-            Task {
-                await imageManager.loadImage(from: item.titleImageUrl)
+        Task { [weak self] in
+            guard let self else { return }
+            self.model = await self.repository.getData()
+            
+            self.model?.news.forEach { item in
+                Task {
+                    await self.imageManager.loadImage(from: item.titleImageUrl)
+                }
             }
         }
+        
     }
 }

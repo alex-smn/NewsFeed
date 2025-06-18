@@ -8,7 +8,7 @@
 import Foundation
 
 class MockNewsFeedRepository: NewsFeedRepositoryProtocol {
-    func getData() -> NewsFeedSourceModel? {
+    func getData() async -> NewsFeedSourceModel? {
         NewsFeedSourceModel(
             news: [
                 NewsItemSourceModel(

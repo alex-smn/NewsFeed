@@ -17,4 +17,10 @@ class DI {
         let newsFeedViewModel = NewsFeedViewModel(repository: mockNewsFeedRepository, imageManager: imageManager)
         return NewsFeedViewController(viewModel: newsFeedViewModel)
     }
+    
+    static var newsFeedViewController: UIViewController {
+        let webNewsFeedRepository = WebNewsFeedRepository()
+        let newsFeedViewModel = NewsFeedViewModel(repository: webNewsFeedRepository, imageManager: imageManager)
+        return NewsFeedViewController(viewModel: newsFeedViewModel)
+    }
 }
