@@ -5,7 +5,13 @@
 //  Created by Alexander Livshits on 16/06/2025.
 //
 
-struct NewsFeedModel: Codable {
+struct NewsFeedSourceModel: Codable {
+    let news: [NewsItemSourceModel]
+    let totalCount: Int
+}
+
+struct NewsFeedModel {
     let news: [NewsItemModel]
     let totalCount: Int
 }
+

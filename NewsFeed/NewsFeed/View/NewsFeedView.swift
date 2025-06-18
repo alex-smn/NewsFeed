@@ -13,7 +13,8 @@ class NewsFeedView: UIView {
     init() {
         super.init(frame: .zero)
         
-        self.addSubview(collectionView)
+        addSubview(collectionView)
+        collectionView.backgroundColor = .white
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         
         collectionView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
