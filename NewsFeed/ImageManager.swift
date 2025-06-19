@@ -10,8 +10,8 @@ import Foundation
 import UIKit
 
 protocol ImageManagerProtocol {
-    func getImagePublisher(from url: URL) -> AnyPublisher<UIImage?, Never>
-    func loadImage(from url: URL) async
+    func getImagePublisher(from url: URL?) -> AnyPublisher<UIImage?, Never>
+    func loadImage(from url: URL?) async
 }
 
 class ImageManager: ImageManagerProtocol {
@@ -22,7 +22,9 @@ class ImageManager: ImageManagerProtocol {
         self.dataStorage = dataStorage
     }
     
-    func getImagePublisher(from url: URL) -> AnyPublisher<UIImage?, Never> {
+    func getImagePublisher(from url: URL?) -> AnyPublisher<UIImage?, Never> {
+        guard let url else { return Just<UIImage?>(nil).eraseToAnyPublisher() }
+        
         let initialImagePublisher = CurrentValueSubject<Void, Never>(()).map { [weak self] _ in
             Future<UIImage?, Never> { [weak self] promise in
                 Task {
@@ -44,7 +46,9 @@ class ImageManager: ImageManagerProtocol {
             .eraseToAnyPublisher()
     }
     
-    func loadImage(from url: URL) async {
+    func loadImage(from url: URL?) async {
+        guard let url else { return }
+        
         if
             let data = await loadFromCache(key: url.absoluteString),
             UIImage(data: data) != nil

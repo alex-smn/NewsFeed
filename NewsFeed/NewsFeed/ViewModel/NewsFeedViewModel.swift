@@ -18,6 +18,10 @@ protocol NewsFeedViewModelProtocol {
     var dataPublisher: AnyPublisher<[NewsItemModel], Never> { get }
     var statePublisher: AnyPublisher<NewsFeedViewModelState, Never> { get }
     var hasMoreDataPublisher: AnyPublisher<Bool, Never> { get }
+    
+    func updateViewVisibility(isVisible: Bool)
+    func didShowItem(item: DisplayItemType)
+    func didSelectItem(id: Int)
 }
 
 class NewsFeedViewModel: NewsFeedViewModelProtocol {
@@ -53,20 +57,17 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
-    
+
     @Published private var model: NewsFeedSourceModel
     @Published private var state: NewsFeedViewModelState = .idle
     
+    var navigateToArticle: ((URL) -> Void)?
+    private let articleLinkSubject = PassthroughSubject<URL, Never>()
     private let repository: NewsFeedRepositoryProtocol
     private let imageManager: ImageManagerProtocol
     private var subscribers = Set<AnyCancellable>()
     private var dataPage: Int = 0
-    
-    weak var viewController: NewsFeedViewProtocol? {
-        didSet {
-            subscribeToPublishers()
-        }
-    }
+    private var isLoadingInitiated: Bool = false
     
     init(repository: NewsFeedRepositoryProtocol, imageManager: ImageManagerProtocol) {
         self.repository = repository
@@ -74,23 +75,27 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
         self.model = NewsFeedSourceModel(news: [], totalCount: 0)
     }
     
-    private func subscribeToPublishers() {
-        viewController?.visibilityPublisher.first(where: { $0 }).sink { [weak self] _ in
-            self?.loadData(page: 0)
-        }.store(in: &subscribers)
-        
-        viewController?.visibleItemsPublisher.sink(receiveValue: { [weak self] items in
-            guard
-                let self,
-                self.state != .loading
-            else {
-                return
-            }
-            if items.contains(where: { $0 == DisplayItemType.loadingSpinner }) {
+    func updateViewVisibility(isVisible: Bool) {
+        if isVisible && !isLoadingInitiated {
+            loadData(page: 0)
+            isLoadingInitiated = true
+        }
+    }
+    
+    func didShowItem(item: DisplayItemType) {
+        if state != .loading {
+            if item == DisplayItemType.loadingSpinner {
                 self.dataPage += 1
                 self.loadData(page: self.dataPage)
             }
-        }).store(in: &subscribers)
+        }
+    }
+    
+    func didSelectItem(id: Int) {
+        let itemModel = self.model.news.first(where: { $0.id == id })
+        if let url = itemModel?.fullUrl {
+            navigateToArticle?(url)
+        }
     }
     
     private func loadData(page: Int) {

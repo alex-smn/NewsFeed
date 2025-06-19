@@ -8,10 +8,7 @@
 import Combine
 import UIKit
 
-protocol NewsFeedViewProtocol: AnyObject {
-    var visibilityPublisher: AnyPublisher<Bool, Never> { get }
-    var visibleItemsPublisher: AnyPublisher<[DisplayItemType], Never> { get }
-    var selectedItemPublisher: AnyPublisher<Int, Never> { get }
+protocol NewsFeedViewProtocol: UIViewController {
 }
 
 enum Sections: Int {
@@ -25,30 +22,7 @@ enum DisplayItemType: Equatable {
 }
 
 class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
-    var visibilityPublisher: AnyPublisher<Bool, Never> {
-        $isVisible.eraseToAnyPublisher()
-    }
-    var visibleItemsPublisher: AnyPublisher<[DisplayItemType], Never> {
-        $visibleItems.map { items in
-            return items.compactMap { [weak self] indexPath -> DisplayItemType? in
-                guard let self else { return nil }
-                if indexPath.section == Sections.news.rawValue {
-                    return DisplayItemType.item(id: self.data[indexPath.row].id)
-                } else {
-                    return DisplayItemType.loadingSpinner
-                }
-            }
-        }.eraseToAnyPublisher()
-    }
-    var selectedItemPublisher: AnyPublisher<Int, Never> {
-        selectedItemSubject.eraseToAnyPublisher()
-    }
-    
-    @Published private var isVisible = false
-    @Published private var visibleItems = Set<IndexPath>()
-    
     private let viewModel: NewsFeedViewModelProtocol
-    private let selectedItemSubject = PassthroughSubject<Int, Never>()
     private var data: [NewsItemModel] = []
     private var state: NewsFeedViewModelState = .idle
     private var subscribers = Set<AnyCancellable>()
@@ -81,12 +55,12 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        isVisible = true
+        viewModel.updateViewVisibility(isVisible: true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        isVisible = false
+        viewModel.updateViewVisibility(isVisible: false)
     }
     
     private func subscribeToPublishers() {
@@ -113,7 +87,7 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
             }
             .store(in: &subscribers)
     }
-
+    
     private func setupCollectionView() {
         guard let collectionView else { return }
         
@@ -185,16 +159,20 @@ extension NewsFeedViewController: UICollectionViewDataSource {
 
 extension NewsFeedViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        visibleItems.insert(indexPath)
+        
+        let item: DisplayItemType
+        if indexPath.section == Sections.news.rawValue {
+            item = .item(id: data[indexPath.row].id)
+        } else {
+            item = .loadingSpinner
+        }
+        
+        viewModel.didShowItem(item: item)    
     }
 
-    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        visibleItems.remove(indexPath)
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.section == Sections.news.rawValue {
-            selectedItemSubject.send(data[indexPath.row].id)
+            viewModel.didSelectItem(id: data[indexPath.row].id)
         }
     }
 }
