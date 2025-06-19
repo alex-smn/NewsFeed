@@ -60,15 +60,11 @@ class ImageManager: ImageManagerProtocol {
     }
     
     private func loadImageFromNetwork(from url: URL) async {
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let image = UIImage(data: data)?.scaledTo(height: Constants.newsItemImageHeight)
-            await saveToCache(key: url.absoluteString, imageData: image?.pngData() ?? data)
-            
-            networkImageSubject.send((key: url.absoluteString, image: image))
-        } catch {
-            print("Failed to load image:", error.localizedDescription) // TODO: handle error
-        }
+        guard let (data, _) = try? await URLSession.shared.data(from: url) else { return }
+        let image = UIImage(data: data)?.scaledTo(height: Constants.newsItemImageHeight)
+        await saveToCache(key: url.absoluteString, imageData: image?.pngData() ?? data)
+        
+        networkImageSubject.send((key: url.absoluteString, image: image))
     }
     
     private func saveToCache(key: String, imageData: Data) async {

@@ -24,17 +24,14 @@ enum DisplayItemType: Equatable {
 class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
     private let viewModel: NewsFeedViewModelProtocol
     private var data: [NewsItemModel] = []
-    private var state: NewsFeedViewModelState = .idle
     private var subscribers = Set<AnyCancellable>()
-    private var collectionView: UICollectionView?
+    private var rootView: NewsFeedView?
     private var hasMoreData: Bool = false
     
     init(viewModel: NewsFeedViewModelProtocol) {
         self.viewModel = viewModel
         
         super.init(nibName: nil, bundle: nil)
-        
-        subscribeToPublishers()
     }
     
     required init?(coder: NSCoder) {
@@ -43,23 +40,27 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
     
     override func loadView() {
         let view = NewsFeedView()
-        collectionView = view.collectionView
         
+        self.rootView = view
         setupCollectionView()
         self.view = view
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        subscribeToPublishers()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         viewModel.updateViewVisibility(isVisible: true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
         viewModel.updateViewVisibility(isVisible: false)
     }
     
@@ -68,8 +69,15 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
             .sink { [weak self] items in
                 guard let self else { return }
                 
+                let currentCount = self.data.count
+                let newCount = items.count
+                
                 self.data = items
-                self.collectionView?.reloadData()
+                if newCount > currentCount {
+                    self.rootView?.collectionView.insertItems(at: (currentCount ..< newCount).map { IndexPath(row: $0, section: Sections.news.rawValue) })
+                } else if currentCount > newCount {
+                    self.rootView?.collectionView.deleteItems(at: (newCount ..< currentCount).map { IndexPath(row: $0, section: Sections.news.rawValue) })
+                }
             }
             .store(in: &subscribers)
         
@@ -77,19 +85,39 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
             .sink { [weak self] state in
                 guard let self else { return }
                 
-                self.state = state
+                var isLoading = false
+                
+                switch state {
+                case .error(let error):
+                    self.rootView?.showError(message: error.localizedDescription)
+                case .loading:
+                    self.rootView?.hideError()
+                    isLoading = true
+                case .idle:
+                    self.rootView?.hideError()
+                }
+                
+                if self.hasMoreData != isLoading {
+                    self.hasMoreData = isLoading
+                    
+                    if isLoading {
+                        self.rootView?.collectionView.insertSections(IndexSet(integer: Sections.loadingSpinner.rawValue))
+                    } else {
+                        self.rootView?.collectionView.deleteSections(IndexSet(integer: Sections.loadingSpinner.rawValue))
+                    }
+                }
             }
             .store(in: &subscribers)
         
-        viewModel.hasMoreDataPublisher
+        rootView?.tryAgainButtonPublisher
             .sink { [weak self] in
-                self?.hasMoreData = $0
+                self?.viewModel.tryAgain()
             }
             .store(in: &subscribers)
     }
     
     private func setupCollectionView() {
-        guard let collectionView else { return }
+        guard let collectionView = rootView?.collectionView else { return }
         
         collectionView.dataSource = self
         collectionView.delegate = self

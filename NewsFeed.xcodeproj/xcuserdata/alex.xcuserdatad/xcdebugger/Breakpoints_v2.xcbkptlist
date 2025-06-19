@@ -23,16 +23,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "FD899BDD-234A-4055-A44E-B2504E50E86B"
+            uuid = "7341C9FD-F412-4539-A2BE-DED08FA849CF"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "NewsFeed/NewsFeed/ViewModel/NewsFeedViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "95"
-            endingLineNumber = "95"
-            landmarkName = "didSelectItem(id:)"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
+            landmarkName = "loadData(page:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -18,14 +18,14 @@ class NewsFeedItemCell: UICollectionViewCell {
         super.prepareForReuse()
         
         titleLabel.text = ""
-        imageView.image = nil
+        imageView.image = UIImage(systemName: "photo.fill")
         imageSubscriber = nil
     }
     
     func set(item: NewsItemModel) {
         titleLabel.text = item.title
         imageSubscriber = item.imagePublisher.sink(receiveValue: { [weak self] image in
-            self?.imageView.image = image
+            self?.imageView.image = image ?? UIImage(systemName: "photo.fill")
         })
     }
 }

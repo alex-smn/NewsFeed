@@ -11,17 +11,17 @@ import Foundation
 enum NewsFeedViewModelState {
     case idle
     case loading
-    case error
+    case error(Error)
 }
 
 protocol NewsFeedViewModelProtocol {
     var dataPublisher: AnyPublisher<[NewsItemModel], Never> { get }
     var statePublisher: AnyPublisher<NewsFeedViewModelState, Never> { get }
-    var hasMoreDataPublisher: AnyPublisher<Bool, Never> { get }
     
     func updateViewVisibility(isVisible: Bool)
     func didShowItem(item: DisplayItemType)
     func didSelectItem(id: Int)
+    func tryAgain()
 }
 
 class NewsFeedViewModel: NewsFeedViewModelProtocol {
@@ -48,15 +48,6 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
-    
-    var hasMoreDataPublisher: AnyPublisher<Bool, Never> {
-        $model
-            .map { model in
-                model.news.count < model.totalCount
-            }
-            .receive(on: DispatchQueue.main)
-            .eraseToAnyPublisher()
-    }
 
     @Published private var model: NewsFeedSourceModel
     @Published private var state: NewsFeedViewModelState = .idle
@@ -66,7 +57,7 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
     private let repository: NewsFeedRepositoryProtocol
     private let imageManager: ImageManagerProtocol
     private var subscribers = Set<AnyCancellable>()
-    private var dataPage: Int = 0
+    private var dataPage: Int = 1
     private var isLoadingInitiated: Bool = false
     
     init(repository: NewsFeedRepositoryProtocol, imageManager: ImageManagerProtocol) {
@@ -77,17 +68,26 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
     
     func updateViewVisibility(isVisible: Bool) {
         if isVisible && !isLoadingInitiated {
-            loadData(page: 0)
+            loadNextPage()
             isLoadingInitiated = true
         }
     }
     
     func didShowItem(item: DisplayItemType) {
-        if state != .loading {
-            if item == DisplayItemType.loadingSpinner {
-                self.dataPage += 1
-                self.loadData(page: self.dataPage)
+        switch item {
+        case .item(let id):
+            guard let item = self.model.news.first(where: { $0.id == id }) else { break }
+            
+            Task { [weak self] in
+                guard let self else { return }
+                await self.imageManager.loadImage(from: item.titleImageUrl)
             }
+            
+            if item.id == model.news.last?.id {
+                loadNextPage()
+            }
+        case .loadingSpinner:
+            break
         }
     }
     
@@ -98,25 +98,31 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
         }
     }
     
+    func tryAgain() {
+        loadData(page: self.dataPage)
+    }
+    
+    private func loadNextPage() {
+        if case .loading = state {
+            return
+        }
+        
+        loadData(page: self.dataPage)
+        dataPage += 1
+    }
+    
     private func loadData(page: Int) {
         Task { [weak self] in
             guard let self else { return }
-            
-            self.state = .loading
-            if let newModel = await self.repository.getData(page: page) {
+            do {
+                self.state = .loading
+                let newModel = try await self.repository.getData(page: page)
                 self.state = .idle
                 
-                self.model.news += newModel.news
-                self.model.totalCount = newModel.totalCount
+                self.model = NewsFeedSourceModel(news: self.model.news + newModel.news, totalCount: newModel.totalCount)
                 
-                self.model.news.forEach { item in
-                    Task {
-                        await self.imageManager.loadImage(from: item.titleImageUrl)
-                    }
-                }
-
-            } else {
-                self.state = .error
+            } catch {
+                self.state = .error(error)
             }
         }
     }

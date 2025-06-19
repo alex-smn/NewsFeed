@@ -8,8 +8,12 @@
 import Foundation
 
 class MockNewsFeedRepository: NewsFeedRepositoryProtocol {
-    func getData(page: Int) async -> NewsFeedSourceModel? {
-        NewsFeedSourceModel(
+    func getData(page: Int) async throws -> NewsFeedSourceModel {
+        if page < 0 {
+            throw NetworkError.incorrectPageNumber
+        }
+        
+        return NewsFeedSourceModel(
             news: [
                 NewsItemSourceModel(
                     id: 8572,
