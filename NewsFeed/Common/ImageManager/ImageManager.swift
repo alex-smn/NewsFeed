@@ -9,11 +9,6 @@ import Combine
 import Foundation
 import UIKit
 
-protocol ImageManagerProtocol {
-    func getImagePublisher(from url: URL?) -> AnyPublisher<UIImage?, Never>
-    func loadImage(from url: URL?) async
-}
-
 class ImageManager: ImageManagerProtocol {
     private let dataStorage: DataStorageProtocol
     private let networkImageSubject = PassthroughSubject<(key: String, image: UIImage?), Never>()

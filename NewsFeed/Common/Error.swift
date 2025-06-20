@@ -9,4 +9,5 @@ import Foundation
 
 enum NetworkError: Error {
     case incorrectPageNumber
+    case incorrectData
 }

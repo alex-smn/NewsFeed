@@ -11,6 +11,7 @@ import UIKit
 class NewsFeedView: UIView {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
+    
     private let errorView = NewsFeedErrorView.loadViewFromNib()
     private let tintView = UIView()
     
@@ -48,6 +49,7 @@ class NewsFeedView: UIView {
     }
     
     private func setupCollectionView() {
+        collectionView.accessibilityIdentifier = "NewsFeedCollectionView"
         collectionView.backgroundColor = .white
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         

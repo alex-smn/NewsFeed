@@ -8,13 +8,8 @@
 import Foundation
 import UIKit
 
-protocol DataStorageProtocol {
-    func save(key: String, data: Data) async
-    func load(key: String) async -> Data?
-}
-
 class LocalDataStorage: DataStorageProtocol {
-    private var storage = [String : Data]() // TODO: consider saving to persistent storage instead
+    private var storage = [String : Data]()
     
     func save(key: String, data: Data) async {
         storage[key] = data

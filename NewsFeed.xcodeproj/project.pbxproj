@@ -30,6 +30,33 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FA52FAEF2E05C11600F2D96F /* Exceptions for "NewsFeed" folder in "NewsFeedTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppCoordinator.swift,
+				Common/Constants.swift,
+				Common/DataStorage/DataStorageProtocol.swift,
+				Common/DataStorage/LocalDataStorage.swift,
+				Common/Error.swift,
+				Common/ImageManager/ImageManager.swift,
+				Common/ImageManager/ImageManagerProtocol.swift,
+				Common/Utility.swift,
+				NewsFeed/Model/NewsFeedModel.swift,
+				NewsFeed/Model/NewsItemModel.swift,
+				NewsFeed/NewsFeedCoordinator.swift,
+				NewsFeed/View/Cells/NewsFeedItemCell.swift,
+				NewsFeed/View/Cells/NewsFeedItemCell.xib,
+				NewsFeed/View/Cells/SpinnerCell.xib,
+				NewsFeed/View/NewsFeedErrorView.swift,
+				NewsFeed/View/NewsFeedErrorView.xib,
+				NewsFeed/View/NewsFeedView.swift,
+				NewsFeed/View/NewsFeedViewController.swift,
+				NewsFeed/ViewModel/NewsFeedViewModel.swift,
+				NewsFeed/ViewModel/Repository/NewsFeedRepositoryProtocol.swift,
+				NewsFeed/ViewModel/Repository/WebNewsFeedRepository.swift,
+			);
+			target = FA7E59882E007E6800BE8A78 /* NewsFeedTests */;
+		};
 		FA7E599B2E007E6800BE8A78 /* Exceptions for "NewsFeed" folder in "NewsFeed" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -44,6 +71,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				FA7E599B2E007E6800BE8A78 /* Exceptions for "NewsFeed" folder in "NewsFeed" target */,
+				FA52FAEF2E05C11600F2D96F /* Exceptions for "NewsFeed" folder in "NewsFeedTests" target */,
 			);
 			path = NewsFeed;
 			sourceTree = "<group>";
@@ -293,8 +321,8 @@
 				INFOPLIST_FILE = NewsFeed/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -319,8 +347,8 @@
 				INFOPLIST_FILE = NewsFeed/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

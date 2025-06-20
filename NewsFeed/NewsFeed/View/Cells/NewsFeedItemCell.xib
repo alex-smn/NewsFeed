@@ -42,6 +42,9 @@
                 </constraints>
             </collectionViewCellContentView>
             <size key="customSize" width="570" height="122"/>
+            <userDefinedRuntimeAttributes>
+                <userDefinedRuntimeAttribute type="string" keyPath="identifier" value="NewsFeedCell"/>
+            </userDefinedRuntimeAttributes>
             <connections>
                 <outlet property="imageView" destination="1hL-FC-Gfw" id="ftF-4m-P4K"/>
                 <outlet property="titleLabel" destination="jIo-dI-WkY" id="DgP-Th-Rux"/>

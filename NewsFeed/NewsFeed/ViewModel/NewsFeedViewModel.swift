@@ -53,7 +53,6 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
     @Published private var state: NewsFeedViewModelState = .idle
     
     var navigateToArticle: ((URL) -> Void)?
-    private let articleLinkSubject = PassthroughSubject<URL, Never>()
     private let repository: NewsFeedRepositoryProtocol
     private let imageManager: ImageManagerProtocol
     private var subscribers = Set<AnyCancellable>()
@@ -108,7 +107,6 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
         }
         
         loadData(page: self.dataPage)
-        dataPage += 1
     }
     
     private func loadData(page: Int) {
@@ -121,6 +119,7 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
                 
                 self.model = NewsFeedSourceModel(news: self.model.news + newModel.news, totalCount: newModel.totalCount)
                 
+                self.dataPage += 1
             } catch {
                 self.state = .error(error)
             }
