@@ -23,6 +23,7 @@ enum DisplayItemType: Equatable {
 
 class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
     private let viewModel: NewsFeedViewModelProtocol
+    private let refreshControl = UIRefreshControl()
     private var data: [NewsItemModel] = []
     private var subscribers = Set<AnyCancellable>()
     private var rootView: NewsFeedView?
@@ -68,6 +69,8 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
         viewModel.dataPublisher
             .sink { [weak self] items in
                 guard let self else { return }
+                
+                self.refreshControl.endRefreshing()
                 
                 let currentCount = self.data.count
                 let newCount = items.count
@@ -136,6 +139,13 @@ class NewsFeedViewController: UIViewController, NewsFeedViewProtocol {
         
         collectionView.register(UINib(nibName: "NewsFeedItemCell", bundle: nil), forCellWithReuseIdentifier: "\(NewsFeedItemCell.self)")
         collectionView.register(UINib(nibName: "SpinnerCell", bundle: nil), forCellWithReuseIdentifier: "SpinnerCell")
+        
+        refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
+       collectionView.refreshControl = refreshControl
+    }
+    
+    @objc private func didPullToRefresh() {
+        viewModel.reloadData()
     }
     
     private func getNewsFeedItemsSectionLayout() -> NSCollectionLayoutSection {

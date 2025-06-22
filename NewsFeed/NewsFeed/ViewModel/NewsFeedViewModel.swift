@@ -22,6 +22,7 @@ protocol NewsFeedViewModelProtocol {
     func didShowItem(item: DisplayItemType)
     func didSelectItem(id: Int)
     func tryAgain()
+    func reloadData()
 }
 
 class NewsFeedViewModel: NewsFeedViewModelProtocol {
@@ -70,6 +71,12 @@ class NewsFeedViewModel: NewsFeedViewModelProtocol {
             loadNextPage()
             isLoadingInitiated = true
         }
+    }
+    
+    func reloadData() {
+        dataPage = 1
+        model.news = []
+        loadNextPage()
     }
     
     func didShowItem(item: DisplayItemType) {
